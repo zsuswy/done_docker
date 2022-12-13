@@ -1,0 +1,42 @@
+proxy_next_upstream_timeout 5s;
+proxy_connect_timeout 5s;
+
+upstream php_server {
+        server 172.20.0.11:9000;
+        server 172.20.0.12:9000;
+        server 172.20.0.13:9000;
+}
+
+server {
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+        root /var/www/html/app/public;
+
+        # Add index.php to the list if you are using PHP
+        index index.html index.htm index.php;
+
+        server_name _;
+
+        # 这里要注意,所有的文件全部都发送到index.php了
+        # 将来这里要做一下路径的配置和区分
+        location / {
+                # try_files $uri $uri/ =404;
+                try_files $uri $uri/ /index.php?$query_string;
+        }
+
+        # pass PHP scripts to FastCGI server
+        #
+        error_page 404 /index.php;
+        error_page 403 /index.php;
+
+        location ~ \.php$ {
+                include snippets/fastcgi-php.conf;
+
+                # With php-fpm (or other unix sockets):
+                # fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+                # With php-cgi (or other tcp sockets):
+                fastcgi_pass php_server;
+                fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+        }
+}

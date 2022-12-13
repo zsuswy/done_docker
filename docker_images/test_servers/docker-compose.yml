@@ -1,0 +1,19 @@
+version: "3.1"
+
+services:
+  php:
+    image: jeff_test_php
+    restart: always
+    ports:
+      - "9000:9000"
+    volumes:
+      - /mnt/c/dev/learn/docker_prac/docker_images/test_servers/php/html:/var/www/html
+      - /mnt/c/dev/learn/docker_prac/docker_images/test_servers/php/www.conf:/etc/php/8.1/fpm/pool.d/www.conf
+  nginx:
+    image: jeff_test_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - /mnt/c/dev/learn/docker_prac/docker_images/test_servers/nginx/html:/var/www/html
+      - /mnt/c/dev/learn/docker_prac/docker_images/test_servers/nginx/default:/etc/nginx/sites-enabled/default

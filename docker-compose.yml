@@ -1,0 +1,94 @@
+version: "3.1"
+
+services:
+  nginx_web:
+    image: jeff_nginx
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      jeff_network:
+        ipv4_address: 172.20.0.2
+    volumes:
+      - /mnt/c/dev/learn/docker_prac/docker_images/nginx/html:/var/www/html
+      - /mnt/c/dev/learn/docker_prac/docker_images/nginx/default:/etc/nginx/sites-enabled/default
+    depends_on:
+      - php_worker
+    #command: ["nginx","-g","daemon off;"]
+
+  php_worker:
+    image: jeff_php
+    restart: always
+    ports:
+      - "9000:9000"
+    networks:
+      jeff_network:
+        aliases:
+          - php01
+        ipv4_address: 172.20.0.11
+    volumes:
+      - /mnt/c/dev/learn/docker_prac/code/prac_app:/var/www/html/app
+      - /mnt/c/dev/learn/docker_prac/docker_images/php/www.conf:/etc/php/8.1/fpm/pool.d/www.conf
+    #command: ["php-fpm8.1", "-F"]
+
+  php_worker02:
+    image: jeff_php
+    restart: always
+    # ports:
+    #   - "9000:9000"
+    networks:
+      jeff_network:
+        aliases:
+          - php02
+        ipv4_address: 172.20.0.12
+    volumes:
+      - /mnt/c/dev/learn/docker_prac/code/prac_app:/var/www/html/app
+      - /mnt/c/dev/learn/docker_prac/docker_images/php/www.conf:/etc/php/8.1/fpm/pool.d/www.conf
+
+  php_worker03:
+    image: jeff_php
+    restart: always
+    # ports:
+    #   - "9000:9000"
+    networks:
+      jeff_network:
+        aliases:
+          - php03
+        ipv4_address: 172.20.0.13
+    volumes:
+      - /mnt/c/dev/learn/docker_prac/code/prac_app:/var/www/html/app
+      - /mnt/c/dev/learn/docker_prac/docker_images/php/www.conf:/etc/php/8.1/fpm/pool.d/www.conf
+
+  mysql_db:
+    image: jeff_mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      #可以使用MYSQL_ROOT_PASSWORD_FILE，MYSQL_PASSWORD_FILE从文件读取密码字符串
+      MYSQL_ROOT_PASSWORD: 1!aA11111111
+      MYSQL_USER: jeff
+      MYSQL_PASSWORD: 1!aA11111111
+    networks:
+      jeff_network:
+        aliases:
+            - mysql01
+        ipv4_address: 172.20.0.3
+    volumes:
+      # 替换配置文件
+      # - /c/dev/learn/docker_prac/docker_images/mysql/conf.d/my.cnf:/etc/mysql/my.cnf
+
+      # /var/lib/mysql 是默认的数据文件路径，需要挂载到本地目录
+      - mysql_data:/var/lib/mysql
+
+networks:
+  jeff_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: "172.20.0.0/16" 
+        gateway: 172.20.0.1
+
+volumes:
+  mysql_data: {}
